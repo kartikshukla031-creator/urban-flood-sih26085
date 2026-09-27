@@ -26,6 +26,7 @@ import {
 } from '../types/flood';
 import { FloodRiskEngine } from '../engine/floodRiskEngine';
 import { generateDemoDEMGrid } from '../data/urbanCatchmentData';
+import { AlertTriangle, MapPin, ChevronRight, Waves } from 'lucide-react';
 
 export default function DashboardPage() {
   // Scenario & Simulation State
@@ -47,14 +48,14 @@ export default function DashboardPage() {
   const [selectedDrainageNodeId, setSelectedDrainageNodeId] = useState<string | null>(null);
   const [selectedFacilityId, setSelectedFacilityId] = useState<string | null>(null);
 
-  // Map Layer Toggles
+  // Map Layer Toggles - Default: Road Flooding ON only (as requested)
   const [layers, setLayers] = useState<MapLayerState>({
     showRoads: true,
-    showDrainagePipes: true,
-    showDrainageNodes: true,
-    showFacilities: true,
-    showDEMContours: true,
-    showSafeRoute: true,
+    showDrainagePipes: false,
+    showDrainageNodes: false,
+    showFacilities: false,
+    showDEMContours: false,
+    showSafeRoute: false,
   });
 
   // Route Options State
@@ -106,6 +107,18 @@ export default function DashboardPage() {
     return activeSimulation.facilities.find((f) => f.id === selectedFacilityId) || null;
   }, [activeSimulation.facilities, selectedFacilityId]);
 
+  // Automatically enable relevant layer when switching to a specialized tab
+  const handleSelectTab = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    if (tab === 'routing') {
+      setLayers((prev) => ({ ...prev, showSafeRoute: true }));
+    } else if (tab === 'facilities') {
+      setLayers((prev) => ({ ...prev, showFacilities: true }));
+    } else if (tab === 'drainage') {
+      setLayers((prev) => ({ ...prev, showDrainagePipes: true, showDrainageNodes: true }));
+    }
+  };
+
   // Nowcast Animation Timer (T+0 -> T+180)
   useEffect(() => {
     if (!isPlaying) return;
@@ -150,15 +163,14 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#070c17] text-slate-100 font-sans select-none overflow-hidden">
+    <div className="flex flex-col h-screen bg-slate-100 text-slate-800 font-sans select-none overflow-hidden">
       {/* Top Bar */}
       <TopBar
         currentScenario={currentScenario}
         onSelectScenario={(sc) => {
           setCurrentScenario(sc);
-          // If selecting emergency demo, auto switch to routing tab
           if (sc.id === 'emergency_response_demo') {
-            setActiveTab('routing');
+            handleSelectTab('routing');
           }
         }}
         timeOffsetMin={timeOffsetMin}
@@ -168,33 +180,33 @@ export default function DashboardPage() {
         rainfallIntensity={activeSimulation.rainfallIntensityMmHr}
         cumulativeRainfall={activeSimulation.cumulativeRainfallMm}
         activeAlertsCount={activeSimulation.activeAlertsCount}
-        onOpenWhatIf={() => setActiveTab('whatif')}
+        onOpenWhatIf={() => handleSelectTab('whatif')}
       />
 
-      {/* Main Container */}
+      {/* Main 3-Section Container: Sidebar (Left) | Hero Map (Center) | Context Panel (Right) */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar Navigation */}
+        {/* Left Section: Navigation Sidebar */}
         <Sidebar
           activeTab={activeTab}
-          onSelectTab={(tab) => setActiveTab(tab)}
+          onSelectTab={handleSelectTab}
           activeAlertsCount={activeSimulation.activeAlertsCount}
           criticalDrainsCount={activeSimulation.criticalDrainageNodesCount}
         />
 
-        {/* Center / Right Content Area */}
+        {/* Center / Right Content Workspace */}
         <main className="flex-1 p-3 flex flex-col gap-2.5 overflow-hidden">
-          {/* Top KPI Metrics Bar */}
+          {/* Top Primary 4 KPIs */}
           <KpiMetrics simulation={activeSimulation} />
 
-          {/* Core Interactive Workspace (Map + Side Panel) */}
+          {/* Interactive Workspace */}
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-0">
-            {/* GIS Center Map (Col 7 or 8) */}
+            {/* Center Section: Main Hero Map (Col 8) + Hydrograph Below */}
             <div
-              className={`h-full min-h-[380px] flex flex-col gap-2 transition-all ${
-                activeTab === 'transparency' ? 'lg:col-span-4' : 'lg:col-span-7 xl:col-span-8'
+              className={`h-full min-h-[380px] flex flex-col gap-2.5 transition-all ${
+                activeTab === 'transparency' ? 'lg:col-span-5' : 'lg:col-span-8'
               }`}
             >
-              <div className="flex-1 relative rounded-lg overflow-hidden border border-slate-800">
+              <div className="flex-1 relative rounded-lg overflow-hidden border border-slate-200 shadow-xs">
                 <FloodMap
                   roads={activeSimulation.roads}
                   drainageNodes={activeSimulation.drainageNodes}
@@ -213,7 +225,7 @@ export default function DashboardPage() {
                 />
               </div>
 
-              {/* Bottom Hydrograph Profile */}
+              {/* Bottom Hydrograph Forecast */}
               <HydrographChart
                 scenario={currentScenario}
                 currentTimeOffset={timeOffsetMin}
@@ -221,10 +233,10 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Right Actionable Intelligence Panel (Col 4 or 5) */}
+            {/* Right Section: Selected Location / Alert Information (Col 4) */}
             <div
               className={`h-full flex flex-col transition-all overflow-hidden ${
-                activeTab === 'transparency' ? 'lg:col-span-8' : 'lg:col-span-5 xl:col-span-4'
+                activeTab === 'transparency' ? 'lg:col-span-7' : 'lg:col-span-4'
               }`}
             >
               {activeTab === 'map' && (
@@ -235,13 +247,59 @@ export default function DashboardPage() {
                       edges={activeSimulation.drainageEdges}
                       onClose={() => setSelectedDrainageNodeId(null)}
                     />
-                  ) : (
+                  ) : selectedRoad ? (
                     <RoadDetailPanel
                       road={selectedRoad}
                       connectedNode={connectedDrainageNode}
                       onClose={() => setSelectedRoadId(null)}
                       onSelectNode={(n) => setSelectedDrainageNodeId(n.id)}
                     />
+                  ) : (
+                    /* Clean Fallback State when no road is clicked */
+                    <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-xs space-y-3 text-xs text-slate-700">
+                      <div className="border-b border-slate-100 pb-2">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          Monitoring Status
+                        </div>
+                        <h2 className="text-sm font-bold text-slate-900 mt-0.5">
+                          Zone Overview & Key Alerts
+                        </h2>
+                      </div>
+
+                      <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1">
+                        <div className="flex items-center gap-1.5 font-semibold text-slate-800">
+                          <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                          <span>Select a Location on the Map</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          Click any colored road segment or drainage node to inspect water depth and traffic diversion advisories.
+                        </p>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="text-[11px] font-semibold text-slate-600 uppercase tracking-wide">
+                          Priority Attention Hotspots
+                        </div>
+                        {activeSimulation.alerts.slice(0, 2).map((alert) => (
+                          <div
+                            key={alert.id}
+                            onClick={() => {
+                              const match = activeSimulation.roads.find((r) => r.name === alert.locationName);
+                              if (match) handleSelectRoad(match);
+                            }}
+                            className="p-2.5 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition cursor-pointer space-y-1"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-slate-900 text-xs">{alert.title}</span>
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+                                {alert.waterDepthCm} cm
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600 truncate">{alert.recommendedAction}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </>
               )}
@@ -291,3 +349,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

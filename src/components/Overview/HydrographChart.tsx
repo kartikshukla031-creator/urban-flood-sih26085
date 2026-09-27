@@ -2,14 +2,13 @@
 
 import React from 'react';
 import {
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   Legend,
   Line,
+  Area,
   ComposedChart,
 } from 'recharts';
 import { FloodScenario } from '../../types/flood';
@@ -30,50 +29,48 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
   const data = [];
   for (let t = 0; t <= 180; t += 15) {
     const rain = RainfallModel.getIntensityAtTime(scenario, t, rainfallMultiplier);
-    const cumul = RainfallModel.getCumulativeRainfall(scenario, t, rainfallMultiplier);
-    // Estimated runoff in m3/s across whole zone
     const runoffM3s = Math.round(((rain * 0.82 * 1100000) / 3600000) * 100) / 100;
-    // Zone safe drainage capacity threshold (~18 m3/s total across all outfalls)
     const nominalDrainCapM3s = 16.5;
 
     data.push({
-      time: t === 0 ? 'T+0' : `+${t}m`,
+      time: t === 0 ? 'Current' : `+${t}m`,
       timeMin: t,
       rainfallMmHr: Math.round(rain),
-      cumulativeMm: cumul,
       runoffM3s,
       nominalDrainCapM3s,
     });
   }
 
   return (
-    <div className="bg-[#0b1329] border border-slate-800 rounded-lg p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-cyan-400" />
-          <span>Catchment Hydrograph & Drainage Overload Profile (0–3h)</span>
+    <div className="bg-white border border-slate-200 rounded-lg p-2.5 shadow-xs">
+      <div className="flex items-center justify-between mb-1.5 px-1">
+        <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-600" />
+          <span>3-Hour Rainfall & Runoff Forecast</span>
         </div>
-        <div className="text-[10px] text-slate-400 font-mono">
-          Current: <span className="text-cyan-300 font-bold">T+{currentTimeOffset} min</span>
+        <div className="text-[11px] text-slate-500">
+          Selected: <strong className="text-blue-700 font-semibold">{currentTimeOffset === 0 ? 'Current (T+0)' : `+${currentTimeOffset} min`}</strong>
         </div>
       </div>
 
-      <div className="h-36 w-full">
+      <div className="h-28 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            <XAxis dataKey="time" stroke="#475569" fontSize={10} tickLine={false} />
-            <YAxis yAxisId="left" stroke="#475569" fontSize={10} tickLine={false} unit=" mm/h" />
+            <XAxis dataKey="time" stroke="#64748b" fontSize={10} tickLine={false} />
+            <YAxis yAxisId="left" stroke="#64748b" fontSize={10} tickLine={false} unit=" mm/h" />
             <YAxis yAxisId="right" orientation="right" stroke="#64748b" fontSize={10} tickLine={false} unit=" m³/s" />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#090f1d',
-                borderColor: '#1e293b',
+                backgroundColor: '#ffffff',
+                borderColor: '#cbd5e1',
                 borderRadius: '6px',
                 fontSize: '11px',
+                color: '#0f172a',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
               }}
             />
             <Legend
-              wrapperStyle={{ fontSize: '10px', paddingTop: '4px' }}
+              wrapperStyle={{ fontSize: '10px', paddingTop: '2px' }}
               iconSize={8}
             />
             <Area
@@ -81,17 +78,17 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
               type="monotone"
               dataKey="rainfallMmHr"
               name="Rainfall (mm/h)"
-              fill="#0284c7"
-              fillOpacity={0.25}
-              stroke="#38bdf8"
-              strokeWidth={2}
+              fill="#bfdbfe"
+              fillOpacity={0.6}
+              stroke="#2563eb"
+              strokeWidth={1.5}
             />
             <Line
               yAxisId="right"
               type="monotone"
               dataKey="runoffM3s"
-              name="Surface Runoff (m³/s)"
-              stroke="#818cf8"
+              name="Runoff (m³/s)"
+              stroke="#4338ca"
               strokeWidth={2}
               dot={false}
             />
@@ -99,8 +96,8 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
               yAxisId="right"
               type="monotone"
               dataKey="nominalDrainCapM3s"
-              name="Drainage Capacity (m³/s)"
-              stroke="#ef4444"
+              name="Drainage Capacity"
+              stroke="#dc2626"
               strokeWidth={1.5}
               strokeDasharray="4 4"
               dot={false}
@@ -111,3 +108,4 @@ export const HydrographChart: React.FC<HydrographChartProps> = ({
     </div>
   );
 };
+

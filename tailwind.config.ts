@@ -11,19 +11,22 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        eoc: {
-          dark: "#0a0f1d",
-          card: "#111827",
-          border: "#1f293d",
-          accent: "#38bdf8",
-          warning: "#f59e0b",
-          danger: "#ef4444",
-          success: "#10b981",
-          purple: "#8b5cf6",
+        gov: {
+          navy: "#0f172a",
+          dark: "#1e293b",
+          blue: "#2563eb",
+          border: "#e2e8f0",
+          card: "#ffffff",
+          muted: "#64748b",
+          subtle: "#f8fafc",
+          surface: "#f1f5f9",
+          warning: "#d97706",
+          danger: "#dc2626",
+          success: "#16a34a",
         }
       },
       fontFamily: {
-        mono: ["var(--font-geist-mono)", "monospace"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
       }
     },
   },

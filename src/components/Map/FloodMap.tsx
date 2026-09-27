@@ -19,10 +19,10 @@ const DynamicFloodMapInner = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full bg-[#080d1a] flex items-center justify-center text-slate-400 font-mono text-xs">
+      <div className="w-full h-full bg-slate-50 flex items-center justify-center text-slate-500 text-xs">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-          <span>Initializing Municipal GIS Spatial Engine...</span>
+          <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <span className="font-medium">Loading GIS Map Engine...</span>
         </div>
       </div>
     ),
@@ -48,14 +48,14 @@ interface FloodMapProps {
 
 export const FloodMap: React.FC<FloodMapProps> = (props) => {
   return (
-    <div className="relative w-full h-full min-h-[460px] rounded-lg overflow-hidden border border-[#1e293b] shadow-2xl">
+    <div className="relative w-full h-full min-h-[460px] rounded-lg overflow-hidden border border-slate-300 shadow-xs bg-slate-100">
       {/* Floating Layer Controls (Top Left) */}
       <div className="absolute top-3 left-12 z-[1000]">
         <LayerControls layers={props.layers} onToggleLayer={props.onToggleLayer} />
       </div>
 
       {/* Floating Legend (Bottom Left) */}
-      <div className="absolute bottom-4 left-3 z-[1000]">
+      <div className="absolute bottom-3 left-3 z-[1000]">
         <MapLegend />
       </div>
 
@@ -64,3 +64,4 @@ export const FloodMap: React.FC<FloodMapProps> = (props) => {
     </div>
   );
 };
+

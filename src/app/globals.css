@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #080c16;
-  --foreground: #f1f5f9;
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 body {
@@ -14,45 +14,45 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Leaflet Dark/Emergency Theme filter */
+/* Realistic Municipal GIS Map Tiles - Clean and natural cartography */
 .eoc-map-tiles .leaflet-tile {
-  filter: brightness(0.7) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35) brightness(0.65);
+  filter: saturate(0.92) contrast(1.02);
 }
 
-/* Custom Scrollbars */
+/* Clean Municipal Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1527;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
 
-/* Pulse animation for critical surcharges */
+/* Subtle pulse for critical alerts */
 @keyframes criticalPulse {
   0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    transform: scale(0.98);
+    opacity: 0.9;
   }
-  70% {
-    transform: scale(1.1);
-    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  50% {
+    transform: scale(1.02);
+    opacity: 1;
   }
   100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    transform: scale(0.98);
+    opacity: 0.9;
   }
 }
 
 .animate-critical-pulse {
-  animation: criticalPulse 2s infinite;
+  animation: criticalPulse 2s infinite ease-in-out;
 }
 
 @keyframes waterFlow {
@@ -66,5 +66,6 @@ body {
 
 .animate-water-flow {
   stroke-dasharray: 6 6;
-  animation: waterFlow 1.2s linear infinite;
+  animation: waterFlow 1.5s linear infinite;
 }
+

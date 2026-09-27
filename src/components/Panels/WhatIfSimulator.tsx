@@ -3,14 +3,11 @@
 import React from 'react';
 import {
   Sliders,
-  Sparkles,
   RotateCcw,
   CloudRain,
   Wrench,
   Cpu,
   Trees,
-  TrendingUp,
-  TrendingDown,
   ArrowRight,
 } from 'lucide-react';
 import { WhatIfParameters, SimulationResult } from '../../types/flood';
@@ -37,44 +34,41 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
     });
   };
 
-  // Compute Deltas
-  const floodedRoadsDelta = simulatedResult.totalFloodedRoadsCount - baselineSimulation.totalFloodedRoadsCount;
-  const maxDepthDelta = Math.round((simulatedResult.maxWaterDepthCm - baselineSimulation.maxWaterDepthCm) * 10) / 10;
-  const criticalDrainsDelta = simulatedResult.criticalDrainageNodesCount - baselineSimulation.criticalDrainageNodesCount;
-
   return (
-    <div className="bg-[#0b1329] border border-slate-800 rounded-lg p-3.5 shadow-2xl space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto">
+    <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-xs space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto text-slate-800">
       {/* Header */}
-      <div className="flex items-start justify-between border-b border-slate-800 pb-2.5">
+      <div className="flex items-start justify-between border-b border-slate-100 pb-2">
         <div>
-          <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-purple-400" />
-            <h2 className="text-sm font-bold text-slate-100">What-If Scenario Digital Twin</h2>
+          <div className="flex items-center gap-1.5">
+            <Sliders className="w-4 h-4 text-blue-600" />
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">
+              What-If Simulation
+            </h2>
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            Simulate hydrodynamic impacts of rainfall cloudbursts, pipe siltation, auxiliary pumps, and green sponge retention.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Adjust scenario variables to evaluate mitigation impact.
           </p>
         </div>
         <button
           onClick={handleReset}
-          className="text-slate-400 hover:text-slate-200 text-xs px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded flex items-center gap-1 transition"
-          title="Reset Parameters"
+          className="text-slate-600 hover:text-slate-900 text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded flex items-center gap-1 font-medium transition shadow-xs"
+          title="Reset to Baseline"
         >
-          <RotateCcw className="w-3 h-3" />
+          <RotateCcw className="w-3 h-3 text-slate-500" />
           Reset
         </button>
       </div>
 
-      {/* Parameter Sliders */}
-      <div className="space-y-3.5">
-        {/* 1. Rainfall Intensity Multiplier */}
-        <div className="bg-[#0f172a] p-2.5 rounded-lg border border-slate-800/80 space-y-1.5">
+      {/* 4 Parameter Controls */}
+      <div className="space-y-3">
+        {/* 1. Rainfall */}
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-300 font-medium flex items-center gap-1.5">
-              <CloudRain className="w-3.5 h-3.5 text-cyan-400" />
-              Rainfall Scale Multiplier
+            <span className="text-slate-700 font-medium flex items-center gap-1.5">
+              <CloudRain className="w-3.5 h-3.5 text-blue-600" />
+              Rainfall
             </span>
-            <span className="font-mono font-bold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
+            <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">
               {parameters.rainfallMultiplier.toFixed(1)}x ({Math.round(simulatedResult.rainfallIntensityMmHr)} mm/h)
             </span>
           </div>
@@ -90,24 +84,24 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 rainfallMultiplier: parseFloat(e.target.value),
               })
             }
-            className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full h-1.5 bg-slate-300 rounded appearance-none cursor-pointer accent-blue-600"
           />
-          <div className="flex justify-between text-[9px] text-slate-500 font-mono">
+          <div className="flex justify-between text-[10px] text-slate-400">
             <span>0.5x (Light)</span>
-            <span>1.0x (Baseline)</span>
-            <span>2.5x (Extreme Cloudburst)</span>
+            <span>1.0x (Normal)</span>
+            <span>2.5x (Extreme)</span>
           </div>
         </div>
 
-        {/* 2. Additional Drainage Blockage */}
-        <div className="bg-[#0f172a] p-2.5 rounded-lg border border-slate-800/80 space-y-1.5">
+        {/* 2. Drainage Blockage */}
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-300 font-medium flex items-center gap-1.5">
-              <Wrench className="w-3.5 h-3.5 text-amber-400" />
-              Network Silt & Debris Blockage
+            <span className="text-slate-700 font-medium flex items-center gap-1.5">
+              <Wrench className="w-3.5 h-3.5 text-amber-600" />
+              Drainage Blockage
             </span>
-            <span className="font-mono font-bold text-amber-300 bg-amber-950 px-2 py-0.5 rounded border border-amber-800">
-              +{parameters.additionalBlockagePct}%
+            <span className="font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs">
+              {parameters.additionalBlockagePct}%
             </span>
           </div>
           <input
@@ -122,23 +116,23 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 additionalBlockagePct: parseInt(e.target.value),
               })
             }
-            className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400"
+            className="w-full h-1.5 bg-slate-300 rounded appearance-none cursor-pointer accent-amber-600"
           />
-          <div className="flex justify-between text-[9px] text-slate-500 font-mono">
-            <span>0% (Clean Pipes)</span>
-            <span>+30% (Severe Silt)</span>
-            <span>+60% (Choked Drains)</span>
+          <div className="flex justify-between text-[10px] text-slate-400">
+            <span>0% (Clean)</span>
+            <span>30% (Moderate)</span>
+            <span>60% (Choked)</span>
           </div>
         </div>
 
-        {/* 3. Auxiliary Dewatering Pumps Capacity */}
-        <div className="bg-[#0f172a] p-2.5 rounded-lg border border-slate-800/80 space-y-1.5">
+        {/* 3. Emergency Pump */}
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-300 font-medium flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-              Emergency Dewatering Pump (Sump M10)
+            <span className="text-slate-700 font-medium flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-blue-600" />
+              Emergency Pump
             </span>
-            <span className="font-mono font-bold text-indigo-300 bg-indigo-950 px-2 py-0.5 rounded border border-indigo-800">
+            <span className="font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">
               {parameters.auxiliaryPumpsLps} L/s
             </span>
           </div>
@@ -154,23 +148,23 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 auxiliaryPumpsLps: parseInt(e.target.value),
               })
             }
-            className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-400"
+            className="w-full h-1.5 bg-slate-300 rounded appearance-none cursor-pointer accent-blue-600"
           />
-          <div className="flex justify-between text-[9px] text-slate-500 font-mono">
+          <div className="flex justify-between text-[10px] text-slate-400">
             <span>0 L/s</span>
-            <span>250 L/s (2 Units)</span>
-            <span>500 L/s (High-Flow Rig)</span>
+            <span>250 L/s</span>
+            <span>500 L/s</span>
           </div>
         </div>
 
-        {/* 4. Green Infrastructure Retention */}
-        <div className="bg-[#0f172a] p-2.5 rounded-lg border border-slate-800/80 space-y-1.5">
+        {/* 4. Green Retention */}
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-slate-300 font-medium flex items-center gap-1.5">
-              <Trees className="w-3.5 h-3.5 text-emerald-400" />
-              Green Sponge Retention (SUDS)
+            <span className="text-slate-700 font-medium flex items-center gap-1.5">
+              <Trees className="w-3.5 h-3.5 text-emerald-600" />
+              Green Retention
             </span>
-            <span className="font-mono font-bold text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+            <span className="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-xs">
               {parameters.greenInfrastructureRetentionPct}%
             </span>
           </div>
@@ -186,66 +180,56 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 greenInfrastructureRetentionPct: parseInt(e.target.value),
               })
             }
-            className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-400"
+            className="w-full h-1.5 bg-slate-300 rounded appearance-none cursor-pointer accent-emerald-600"
           />
-          <div className="flex justify-between text-[9px] text-slate-500 font-mono">
-            <span>0% (Current Concrete)</span>
+          <div className="flex justify-between text-[10px] text-slate-400">
+            <span>0%</span>
             <span>20% (Bio-swales)</span>
-            <span>40% (Full Sponge City)</span>
+            <span>40% (Sponge City)</span>
           </div>
         </div>
       </div>
 
-      {/* Comparative Before vs After Impact Matrix */}
-      <div className="bg-[#09101f] p-3 rounded-lg border border-slate-800 space-y-2.5">
-        <div className="text-[11px] font-bold text-slate-200 uppercase font-mono flex items-center justify-between">
-          <span>Comparative Simulation Delta</span>
-          <span className="text-[9px] text-purple-400 font-semibold bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-800/50">
-            BEFORE vs AFTER
-          </span>
+      {/* Simulated Impact Section */}
+      <div className="bg-slate-50 p-3 rounded-md border border-slate-200 space-y-2">
+        <div className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+          Simulated Impact
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="bg-[#0f172a] p-2 rounded border border-slate-800">
-            <div className="text-[10px] text-slate-400 font-mono">Flooded Roads</div>
-            <div className="text-sm font-bold font-mono text-slate-100 mt-0.5">
-              {baselineSimulation.totalFloodedRoadsCount} ➔ {simulatedResult.totalFloodedRoadsCount}
-            </div>
-            <div
-              className={`text-[10px] font-mono font-semibold flex items-center justify-center gap-0.5 mt-0.5 ${
-                floodedRoadsDelta > 0 ? 'text-rose-400' : floodedRoadsDelta < 0 ? 'text-emerald-400' : 'text-slate-400'
-              }`}
-            >
-              {floodedRoadsDelta > 0 ? <TrendingUp className="w-3 h-3" /> : floodedRoadsDelta < 0 ? <TrendingDown className="w-3 h-3" /> : null}
-              {floodedRoadsDelta > 0 ? `+${floodedRoadsDelta}` : `${floodedRoadsDelta}`} roads
+        <div className="space-y-2 text-xs">
+          {/* Flood Depth */}
+          <div className="bg-white p-2.5 rounded border border-slate-200 flex items-center justify-between">
+            <span className="text-slate-600 font-medium">Flood Depth:</span>
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <span className="text-slate-500 font-normal">{baselineSimulation.maxWaterDepthCm} cm</span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+              <span className={simulatedResult.maxWaterDepthCm < baselineSimulation.maxWaterDepthCm ? 'text-emerald-700' : simulatedResult.maxWaterDepthCm > baselineSimulation.maxWaterDepthCm ? 'text-red-600' : 'text-slate-800'}>
+                {simulatedResult.maxWaterDepthCm} cm
+              </span>
             </div>
           </div>
 
-          <div className="bg-[#0f172a] p-2 rounded border border-slate-800">
-            <div className="text-[10px] text-slate-400 font-mono">Max Depth</div>
-            <div className="text-sm font-bold font-mono text-slate-100 mt-0.5">
-              {baselineSimulation.maxWaterDepthCm} ➔ {simulatedResult.maxWaterDepthCm} cm
-            </div>
-            <div
-              className={`text-[10px] font-mono font-semibold flex items-center justify-center gap-0.5 mt-0.5 ${
-                maxDepthDelta > 0 ? 'text-rose-400' : maxDepthDelta < 0 ? 'text-emerald-400' : 'text-slate-400'
-              }`}
-            >
-              {maxDepthDelta > 0 ? `+${maxDepthDelta}` : `${maxDepthDelta}`} cm
+          {/* Drainage Load */}
+          <div className="bg-white p-2.5 rounded border border-slate-200 flex items-center justify-between">
+            <span className="text-slate-600 font-medium">Drainage Load:</span>
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <span className="text-slate-500 font-normal">{baselineSimulation.averageDrainageLoadPct}%</span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+              <span className={simulatedResult.averageDrainageLoadPct < baselineSimulation.averageDrainageLoadPct ? 'text-emerald-700' : simulatedResult.averageDrainageLoadPct > baselineSimulation.averageDrainageLoadPct ? 'text-red-600' : 'text-slate-800'}>
+                {simulatedResult.averageDrainageLoadPct}%
+              </span>
             </div>
           </div>
 
-          <div className="bg-[#0f172a] p-2 rounded border border-slate-800">
-            <div className="text-[10px] text-slate-400 font-mono">Drain Overloads</div>
-            <div className="text-sm font-bold font-mono text-slate-100 mt-0.5">
-              {baselineSimulation.criticalDrainageNodesCount} ➔ {simulatedResult.criticalDrainageNodesCount}
-            </div>
-            <div
-              className={`text-[10px] font-mono font-semibold flex items-center justify-center gap-0.5 mt-0.5 ${
-                criticalDrainsDelta > 0 ? 'text-rose-400' : criticalDrainsDelta < 0 ? 'text-emerald-400' : 'text-slate-400'
-              }`}
-            >
-              {criticalDrainsDelta > 0 ? `+${criticalDrainsDelta}` : `${criticalDrainsDelta}`} nodes
+          {/* Flooded Roads */}
+          <div className="bg-white p-2.5 rounded border border-slate-200 flex items-center justify-between">
+            <span className="text-slate-600 font-medium">Flooded Roads:</span>
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <span className="text-slate-500 font-normal">{baselineSimulation.totalFloodedRoadsCount}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+              <span className={simulatedResult.totalFloodedRoadsCount < baselineSimulation.totalFloodedRoadsCount ? 'text-emerald-700' : simulatedResult.totalFloodedRoadsCount > baselineSimulation.totalFloodedRoadsCount ? 'text-red-600' : 'text-slate-800'}>
+                {simulatedResult.totalFloodedRoadsCount}
+              </span>
             </div>
           </div>
         </div>
@@ -253,3 +237,4 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
     </div>
   );
 };
+

@@ -1,15 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   X,
-  GitGraph,
   Gauge,
-  AlertOctagon,
-  Wrench,
-  Layers,
   Droplet,
-  Compass,
+  Wrench,
+  AlertOctagon,
+  ChevronDown,
+  ChevronUp,
+  GitGraph,
+  Layers,
 } from 'lucide-react';
 import { DrainageNode, DrainageEdge } from '../../types/flood';
 
@@ -24,166 +25,185 @@ export const DrainageDetailPanel: React.FC<DrainageDetailPanelProps> = ({
   edges,
   onClose,
 }) => {
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+
   if (!node) return null;
 
   const connectedEdges = edges.filter(
     (e) => e.startNodeId === node.id || e.endNodeId === node.id
   );
 
-  const statusColor =
+  const isCritical = node.status === 'CRITICAL_SURCHARGE' || node.status === 'OVERLOADED';
+  const statusLabel =
     node.status === 'CRITICAL_SURCHARGE'
-      ? 'bg-rose-950/90 text-rose-300 border-rose-700'
+      ? 'Critical'
       : node.status === 'OVERLOADED'
-      ? 'bg-orange-950/90 text-orange-300 border-orange-700'
+      ? 'Overloaded'
       : node.status === 'ELEVATED'
-      ? 'bg-yellow-950/90 text-yellow-300 border-yellow-700'
-      : 'bg-emerald-950/90 text-emerald-300 border-emerald-700';
+      ? 'Elevated'
+      : 'Normal';
 
-  const vulnColor =
-    node.vulnerabilityScore === 'CRITICAL'
-      ? 'text-rose-400 font-bold'
-      : node.vulnerabilityScore === 'HIGH'
-      ? 'text-amber-400 font-bold'
-      : 'text-emerald-400';
+  const statusBadgeStyle =
+    node.status === 'CRITICAL_SURCHARGE'
+      ? 'bg-red-50 text-red-700 border-red-200'
+      : node.status === 'OVERLOADED'
+      ? 'bg-orange-50 text-orange-700 border-orange-200'
+      : node.status === 'ELEVATED'
+      ? 'bg-amber-50 text-amber-800 border-amber-200'
+      : 'bg-emerald-50 text-emerald-800 border-emerald-200';
+
+  const recommendedAction =
+    node.status === 'CRITICAL_SURCHARGE'
+      ? 'Inspect / Clear Drain & Deploy Dewatering Pump'
+      : node.blockagePercentage >= 25
+      ? 'Inspect / Clear Silt Blockage'
+      : node.status === 'OVERLOADED'
+      ? 'Monitor Hydraulic Pressure / Divert Flow'
+      : 'Routine Maintenance / Standby';
 
   return (
-    <div className="bg-[#0b1329] border border-slate-800 rounded-lg p-3.5 shadow-2xl space-y-3.5 max-h-[calc(100vh-140px)] overflow-y-auto">
+    <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-xs space-y-3 max-h-[calc(100vh-140px)] overflow-y-auto text-slate-800">
       {/* Header */}
-      <div className="flex items-start justify-between border-b border-slate-800 pb-2.5">
+      <div className="flex items-start justify-between border-b border-slate-100 pb-2">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400 font-mono text-[11px] uppercase">Stormwater Node / Inlet</span>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${statusColor}`}>
-              {node.status}
-            </span>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            Drainage Status
           </div>
-          <h2 className="text-sm font-bold text-slate-100 mt-0.5">{node.name}</h2>
+          <h2 className="text-base font-bold text-slate-900 mt-0.5">{node.name}</h2>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-200 p-1 hover:bg-slate-800 rounded transition"
+          className="text-slate-400 hover:text-slate-700 p-1 hover:bg-slate-100 rounded transition"
+          title="Close Panel"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Hydraulic Capacity & Load Diagnostics */}
+      {/* Primary 4-field Summary Grid */}
       <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="bg-[#0f172a] p-2 rounded-lg border border-slate-800/80">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1">
-            <Gauge className="w-3 h-3 text-cyan-400" />
-            Total Flow Load
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200">
+          <div className="text-[10px] text-slate-500 uppercase font-medium flex items-center gap-1">
+            <Gauge className="w-3.5 h-3.5 text-blue-600" />
+            Status
           </div>
-          <div className="text-lg font-bold font-mono text-cyan-300 mt-0.5">
-            {node.totalLoadLps} <span className="text-xs font-normal text-slate-400">L/s</span>
-          </div>
-          <div className="text-[10px] text-slate-400">
-            Capacity Load: <span className="font-bold text-slate-200">{node.loadPercentage}%</span>
+          <div className="mt-1">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${statusBadgeStyle}`}>
+              {statusLabel}
+            </span>
           </div>
         </div>
 
-        <div className="bg-[#0f172a] p-2 rounded-lg border border-slate-800/80">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1">
-            <Droplet className="w-3 h-3 text-blue-400" />
-            Effective Discharge
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200">
+          <div className="text-[10px] text-slate-500 uppercase font-medium flex items-center gap-1">
+            <Droplet className="w-3.5 h-3.5 text-blue-600" />
+            Current Flow
           </div>
-          <div className="text-lg font-bold font-mono text-blue-300 mt-0.5">
-            {node.effectiveCapacityLps} <span className="text-xs font-normal text-slate-400">L/s</span>
+          <div className="text-base font-bold text-slate-900 mt-0.5">
+            {node.totalLoadLps} <span className="text-xs font-normal text-slate-500">L/s</span>
           </div>
-          <div className="text-[10px] text-slate-400">Nominal: {node.nominalCapacityLps} L/s</div>
         </div>
 
-        <div className="bg-[#0f172a] p-2 rounded-lg border border-slate-800/80">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1">
-            <AlertOctagon className="w-3 h-3 text-rose-400" />
-            Surcharge Rate
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200">
+          <div className="text-[10px] text-slate-500 uppercase font-medium">
+            Available Capacity
           </div>
-          <div className="text-sm font-bold font-mono text-rose-400 mt-0.5">
-            {node.surchargeRateLps > 0 ? `+${node.surchargeRateLps} L/s (Overflow)` : '0 L/s (No Spill)'}
+          <div className="text-base font-bold text-slate-900 mt-0.5">
+            {node.effectiveCapacityLps} <span className="text-xs font-normal text-slate-500">L/s</span>
           </div>
-          <div className="text-[10px] text-slate-400">Surface Backflow</div>
         </div>
 
-        <div className="bg-[#0f172a] p-2 rounded-lg border border-slate-800/80">
-          <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1">
-            <Wrench className="w-3 h-3 text-amber-400" />
-            Silt / Debris Blockage
+        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200">
+          <div className="text-[10px] text-slate-500 uppercase font-medium flex items-center gap-1">
+            <Wrench className="w-3.5 h-3.5 text-amber-600" />
+            Blockage
           </div>
-          <div className="text-sm font-bold font-mono text-amber-300 mt-0.5">
-            {node.blockagePercentage}% Blocked
+          <div className="text-base font-bold text-slate-900 mt-0.5">
+            {node.blockagePercentage}%
           </div>
-          <div className="text-[10px] text-slate-400">Constriction Factor: {Math.round(Math.pow(1 - node.blockagePercentage/100, 1.5)*100)}%</div>
         </div>
       </div>
 
-      {/* Hydraulic Inflow Breakdown */}
-      <div className="bg-[#09101f] p-2.5 rounded-lg border border-slate-800 space-y-1.5 text-xs font-mono">
-        <div className="text-[11px] font-bold text-slate-200 uppercase font-sans mb-1 flex items-center gap-1">
-          <Layers className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Hydraulic Inflow Mass Balance</span>
+      {/* Recommended Action */}
+      <div className="bg-blue-50/70 border border-blue-200 rounded-md p-2.5">
+        <div className="text-[10px] font-bold text-blue-800 uppercase tracking-wider mb-0.5">
+          Action Directive
         </div>
-        <div className="flex justify-between text-slate-400">
-          <span>Catchment Surface Runoff:</span>
-          <span className="text-cyan-300 font-bold">+{node.currentInflowLps} L/s</span>
-        </div>
-        <div className="flex justify-between text-slate-400">
-          <span>Upstream Pipe Feed:</span>
-          <span className="text-indigo-300 font-bold">+{node.upstreamFlowLps} L/s</span>
-        </div>
-        <div className="flex justify-between text-slate-400 border-t border-slate-800 pt-1">
-          <span>Total Hydraulic Inflow:</span>
-          <span className="text-slate-100 font-bold">{node.totalLoadLps} L/s</span>
-        </div>
-        <div className="flex justify-between text-slate-400">
-          <span>Max Available Discharge:</span>
-          <span className="text-emerald-300 font-bold">-{node.effectiveCapacityLps} L/s</span>
-        </div>
+        <p className="text-xs text-slate-800 font-medium">
+          {recommendedAction}
+        </p>
       </div>
 
-      {/* Vulnerability & Maintenance Recommendation */}
-      <div className="bg-gradient-to-br from-slate-900 to-[#0f172a] border border-slate-800 rounded-lg p-2.5 space-y-1">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400 uppercase font-mono text-[10px]">Vulnerability Rating</span>
-          <span className={`font-mono text-xs uppercase ${vulnColor}`}>{node.vulnerabilityScore}</span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400 uppercase font-mono text-[10px]">Maintenance Priority</span>
-          <span className="text-cyan-300 font-bold font-mono text-xs uppercase">{node.maintenancePriority}</span>
-        </div>
-        <div className="text-[10px] text-slate-400 leading-tight pt-1">
-          {node.status === 'CRITICAL_SURCHARGE'
-            ? 'Emergency de-silting and mobile trash-pump deployment recommended to clear backflow.'
-            : node.blockagePercentage >= 30
-            ? 'Scheduled municipal drain desilting required before next high-precipitation event.'
-            : 'Operational within safe design thresholds.'}
-        </div>
-      </div>
+      {/* Expandable Technical Details Button */}
+      <button
+        onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-medium text-slate-700 transition"
+      >
+        <span>Technical Details</span>
+        {showTechnicalDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+      </button>
 
-      {/* Connected Pipe Network Edges */}
-      <div className="bg-[#09101f] p-2.5 rounded-lg border border-slate-800 space-y-2">
-        <div className="text-[11px] font-bold text-slate-200 flex items-center gap-1 font-sans">
-          <GitGraph className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Connected Stormwater Conduits ({connectedEdges.length})</span>
-        </div>
-        <div className="space-y-1.5 max-h-28 overflow-y-auto">
-          {connectedEdges.map((e) => (
-            <div key={e.id} className="bg-[#0f172a] p-1.5 rounded border border-slate-800 text-[10px] flex items-center justify-between">
-              <div>
-                <div className="font-bold text-slate-200">{e.name}</div>
-                <div className="text-slate-400 font-mono">
-                  D: {e.diameterM}m | Slope: {e.slope} | Blockage: {e.blockagePercentage}%
-                </div>
-              </div>
-              <div className="text-right font-mono">
-                <div className={e.utilizationPercentage >= 95 ? 'text-rose-400 font-bold' : 'text-cyan-300'}>
-                  {e.currentFlowLps} / {e.effectiveCapacityLps} L/s
-                </div>
-                <div className="text-[9px] text-slate-400">{e.utilizationPercentage}% Cap</div>
-              </div>
+      {/* Technical Details Expanded */}
+      {showTechnicalDetails && (
+        <div className="space-y-3 pt-1 border-t border-slate-100 text-xs">
+          {/* Water Flow Balance (formerly Hydraulic Inflow Mass Balance) */}
+          <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1.5">
+            <div className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
+              <span>Water Flow Balance</span>
             </div>
-          ))}
+            <div className="flex justify-between text-slate-600">
+              <span>Surface Runoff:</span>
+              <span className="font-semibold text-slate-800">+{node.currentInflowLps} L/s</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Upstream Conduit Feed:</span>
+              <span className="font-semibold text-slate-800">+{node.upstreamFlowLps} L/s</span>
+            </div>
+            <div className="flex justify-between text-slate-700 border-t border-slate-200 pt-1 font-medium">
+              <span>Total Water Load:</span>
+              <span className="font-bold text-slate-900">{node.totalLoadLps} L/s</span>
+            </div>
+            <div className="flex justify-between text-slate-600">
+              <span>Effective Discharge Capacity:</span>
+              <span className="font-semibold text-emerald-700">-{node.effectiveCapacityLps} L/s</span>
+            </div>
+            {node.surchargeRateLps > 0 && (
+              <div className="flex justify-between text-red-700 font-bold border-t border-slate-200 pt-1">
+                <span>Drainage Overload (Surcharge):</span>
+                <span>+{node.surchargeRateLps} L/s</span>
+              </div>
+            )}
+          </div>
+
+          {/* Connected Conduits */}
+          <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 space-y-1.5">
+            <div className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+              <GitGraph className="w-3.5 h-3.5 text-blue-600" />
+              <span>Connected Conduits ({connectedEdges.length})</span>
+            </div>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {connectedEdges.map((e) => (
+                <div key={e.id} className="bg-white p-1.5 rounded border border-slate-200 text-[11px] flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-slate-800">{e.name}</div>
+                    <div className="text-slate-500 text-[10px]">
+                      Diameter: {e.diameterM}m | Slope: {e.slope} | Silt: {e.blockagePercentage}%
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={e.utilizationPercentage >= 95 ? 'text-red-600 font-bold' : 'text-slate-800 font-medium'}>
+                      {e.currentFlowLps} / {e.effectiveCapacityLps} L/s
+                    </div>
+                    <div className="text-[10px] text-slate-500">{e.utilizationPercentage}% Capacity</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
+

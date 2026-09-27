@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  ExternalLink,
 } from 'lucide-react';
 import { CriticalFacility } from '../../types/flood';
 
@@ -45,14 +44,16 @@ export const CriticalInfrastructure: React.FC<CriticalInfrastructureProps> = ({
   };
 
   return (
-    <div className="bg-[#0b1329] border border-slate-800 rounded-lg p-3.5 shadow-2xl space-y-3.5 max-h-[calc(100vh-140px)] overflow-y-auto">
-      <div className="border-b border-slate-800 pb-2.5">
-        <div className="flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-cyan-400" />
-          <h2 className="text-sm font-bold text-slate-100">Critical Infrastructure Monitoring</h2>
+    <div className="bg-white border border-slate-200 rounded-lg p-3.5 shadow-xs space-y-3 max-h-[calc(100vh-140px)] overflow-y-auto text-slate-800">
+      <div className="border-b border-slate-100 pb-2">
+        <div className="flex items-center gap-1.5">
+          <Building2 className="w-4 h-4 text-blue-600" />
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">
+            Critical Infrastructure
+          </h2>
         </div>
-        <p className="text-[11px] text-slate-400 mt-0.5">
-          Real-time access feasibility and inundation risk for emergency hubs, hospitals, and shelters.
+        <p className="text-xs text-slate-500 mt-0.5">
+          Accessibility status for essential municipal services.
         </p>
       </div>
 
@@ -62,60 +63,52 @@ export const CriticalInfrastructure: React.FC<CriticalInfrastructureProps> = ({
           const isCutOff = fac.accessStatus === 'CUT_OFF';
           const isMarginal = fac.accessStatus === 'MARGINAL';
 
-          const cardBorder = isCutOff
-            ? 'border-rose-700/80 bg-rose-950/20'
+          const statusText = isCutOff ? 'Access Affected' : isMarginal ? 'At Risk' : 'Accessible';
+
+          const cardStyle = isCutOff
+            ? 'border-red-200 bg-red-50/30'
             : isMarginal
-            ? 'border-amber-700/80 bg-amber-950/20'
-            : 'border-slate-800/80 bg-[#0f172a]';
+            ? 'border-amber-200 bg-amber-50/30'
+            : 'border-slate-200 bg-slate-50/60';
+
+          const badgeStyle = isCutOff
+            ? 'bg-red-50 text-red-700 border-red-200'
+            : isMarginal
+            ? 'bg-amber-50 text-amber-800 border-amber-200'
+            : 'bg-emerald-50 text-emerald-800 border-emerald-200';
 
           return (
             <div
               key={fac.id}
               onClick={() => onSelectFacility(fac)}
-              className={`p-3 rounded-lg border ${cardBorder} hover:border-cyan-600 transition cursor-pointer space-y-2`}
+              className={`p-3 rounded-md border ${cardStyle} hover:border-blue-400 transition cursor-pointer space-y-2`}
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <div
-                    className={`p-1.5 rounded-md ${
-                      isCutOff
-                        ? 'bg-rose-900/60 text-rose-300'
-                        : isMarginal
-                        ? 'bg-amber-900/60 text-amber-300'
-                        : 'bg-cyan-950 text-cyan-400'
-                    }`}
-                  >
+                  <div className="p-1.5 rounded-md bg-white border border-slate-200 text-blue-600 shadow-xs">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold text-slate-200">{fac.name}</h3>
-                    <div className="text-[10px] text-slate-400 font-mono">
-                      Elevation: {fac.elevationM}m MSL | Approach: {fac.nearestRoadId}
+                    <h3 className="text-xs font-bold text-slate-900">{fac.name}</h3>
+                    <div className="text-[11px] text-slate-500">
+                      Approach Road: <strong>{fac.nearestRoadId}</strong> • Depth: <strong>{fac.predictedDepthCm} cm</strong>
                     </div>
                   </div>
                 </div>
 
-                <span
-                  className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border flex items-center gap-1 ${
-                    isCutOff
-                      ? 'bg-rose-950 text-rose-300 border-rose-700 animate-pulse'
-                      : isMarginal
-                      ? 'bg-amber-950 text-amber-300 border-amber-700'
-                      : 'bg-emerald-950 text-emerald-300 border-emerald-700'
-                  }`}
-                >
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded border flex items-center gap-1 shrink-0 ${badgeStyle}`}>
                   {isCutOff ? (
-                    <XCircle className="w-2.5 h-2.5" />
+                    <XCircle className="w-3 h-3 text-red-600" />
                   ) : isMarginal ? (
-                    <AlertTriangle className="w-2.5 h-2.5" />
+                    <AlertTriangle className="w-3 h-3 text-amber-600" />
                   ) : (
-                    <CheckCircle2 className="w-2.5 h-2.5" />
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                   )}
-                  {fac.accessStatus}
+                  {statusText}
                 </span>
               </div>
 
-              <p className="text-[11px] text-slate-300 bg-[#080d1a]/80 p-2 rounded border border-slate-800/60 leading-relaxed">
+              <p className="text-xs text-slate-700 bg-white p-2 rounded border border-slate-200 font-medium">
                 {fac.alertMessage}
               </p>
             </div>
@@ -125,3 +118,4 @@ export const CriticalInfrastructure: React.FC<CriticalInfrastructureProps> = ({
     </div>
   );
 };
+
